@@ -1,0 +1,36 @@
+version: '2.3'
+services:
+    api_server:
+        image: det2-api_server:latest
+        volumes:
+            - ${WORKSPACE}:${WORKSPACE}
+        restart: always
+        ports:
+            - "8000:8000"
+        working_dir: ${SERVING_DIR}
+        networks:
+            - det2_serving_network
+        depends_on: 
+            - rabbitmq
+            - model_server
+        command: uvicorn api_server:app --host 0.0.0.0 --port 8000 --reload
+
+    model_server:
+        image: det2-model_server:latest
+        volumes:
+            - ${WORKSPACE}:${WORKSPACE}
+        restart: always
+        working_dir: ${SERVING_DIR}
+        networks:
+            - det2_serving_network
+        depends_on: 
+            - rabbitmq
+        command: python3 model_server.py
+
+    rabbitmq:
+        image: rabbitmq:3-management
+        restart: always
+        networks:
+            - det2_serving_network
+networks:
+    det2_serving_network:
