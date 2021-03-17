@@ -1,13 +1,15 @@
 version: '2.3'
 services:
     api_server:
-        image: det2-api_server:latest
+        image: det2-serving:latest
         volumes:
             - ${WORKSPACE}:${WORKSPACE}
         restart: always
         ports:
             - "8000:8000"
         working_dir: ${SERVING_DIR}
+        environment: 
+            - RPC_BATCH_SIZE=${RPC_BATCH_SIZE}
         networks:
             - det2_serving_network
         depends_on: 
@@ -16,11 +18,13 @@ services:
         command: uvicorn api_server:app --host 0.0.0.0 --port 8000 --reload
 
     model_server:
-        image: det2-model_server:latest
+        image: det2-serving:latest
         volumes:
             - ${WORKSPACE}:${WORKSPACE}
-        restart: always
+        # restart: always
         working_dir: ${SERVING_DIR}
+        environment: 
+            - RPC_BATCH_SIZE=${RPC_BATCH_SIZE}
         networks:
             - det2_serving_network
         depends_on: 
